@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AiOutlineMenu } from 'react-icons/ai';
 import Avatar from '../Avatar';
 import MenuItem from './MenuItem';
@@ -16,6 +16,7 @@ interface UserMenuProps {
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
   const rentModal = useRentModal();
@@ -33,7 +34,20 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
 
     rentModal.onOpen();
   }, [currentUser, loginModal, rentModal]);
-  
+
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      setIsOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [handleClickOutside]);
+
   return (
     <div className='relative'>
       <div className='flex flex-row items-center gap-3'>
@@ -83,6 +97,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
 
       { isOpen && (
         <div
+          ref={dropdownRef}
           className='
             absolute
             rounded-xl
